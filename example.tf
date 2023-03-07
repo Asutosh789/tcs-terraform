@@ -1,22 +1,31 @@
-locals {
-env = "forum"
-owner = "Ritesh-DevOps"
+terraform {
+  backend "s3" {
+    bucket = "asutosh-aws-infrastructure-tfstate"
+    key    = "devops/terraform.tfstate"
+    region = "ap-south-1"
+  }
 }
-variable "region" {
-default = "ap-south-1"
-}
+
+
 provider "aws" {
-region = var.region
+  region = "ap-south-1"
 }
 resource "aws_instance" "instance01" {
-ami = "ami-04db49c0fb2215364"
-instance_type = "t2.micro"
-tags = {
-"Name" = "web-server"
-"environment" = local.env
-"owner" = local.owner
+  ami           = "ami-09ba48996007c8b50"
+  instance_type = "t2.micro"
+  key_name      = "Asutosh-key-demo"
+  tags = {
+    Name = "terraform3-devops"
+  }
+  security_groups = ["${aws_security_group.AWSaccess.name}"]
 }
-}
-output "ip" {
-value = aws_instance.instance01.public_ip
+resource "aws_security_group" "AWSaccess" {
+  name        = "AWSaccess-terraform3"
+  description = "SSH access"
+  ingress {
+    protocol    = "tcp"
+    from_port   = 22
+    to_port     = 22
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
